@@ -496,10 +496,9 @@ def main():
     )
 
     # 1. Display Standard Results (Pie Chart / Bar Graph)
-    # NOTE: You must close the window that pops up for the code to continue!
     display_results(allocation, params)
     
-    # 2. Display KKT Residuals Plot (The new request)
+    # 2. Display KKT Residuals Plot 
     if 'kkt_diagnostics' in allocation:
         print("\nGeneratng KKT Residuals Plot...")
         plot_kkt_residuals(allocation['kkt_diagnostics'])
@@ -537,6 +536,12 @@ def main():
         plt.savefig('sensitivity_analysis_ecos.png', dpi=150)
         plt.show()
         print("\nChart saved as 'sensitivity_analysis_ecos.png'")
+
+    #-------------------------
+'''Note: 
+If the curve is steep, investing more capital increases output strongly
+If the curve flattens, the firm is hitting diminishing returns
+If the curve bends, it shows non-linear cost structures affecting output'''
 
 if __name__ == "__main__":
     main()
