@@ -288,11 +288,18 @@ def plot_kkt_residuals(kkt_res):
 #-----------------OPTIMISATION MODEL-------------------
 def optimize_allocation(p, c, Q, alpha, principal):
     """
-    Solve: maximize p^T*x + alpha*sqrt(m)
+    Solve: maximize p^T*x + alpha*sqrt(m) 
     subject to: c^T*x + m + 0.5*x^T*Q*x <= principal
                 x >= 0, m >= 0
-    ECOS is forced.
     """
+    ------------
+    # p^T*x is output (or profit) generated from spending
+    # alpha*sqrt(m) is the contribution from marketing (because of diminishing returns)
+    # c^T*x - cost of spending
+    # m - marketing costs
+    #  0.5*x^T*Q*x - models curvature in the cost of the inputs (term introduces non-linear cost increases)
+    -----------
+    
     x = cp.Variable(3)
     m = cp.Variable(nonneg=True)
 
