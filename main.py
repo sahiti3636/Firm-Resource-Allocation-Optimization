@@ -72,6 +72,29 @@ def firm_quiz():
         'capital': capital
     }
 
+def map_parameters(quiz_results):
+    base_productivity = quiz_results['efficiency'] * 0.4
+    p = np.array([
+        base_productivity + 0.3,
+        base_productivity + 0.25,
+        base_productivity + 0.2
+    ])
+
+    c = np.array([
+        5.0 - quiz_results['labour'] * 0.5,
+        4.0 - quiz_results['materials'] * 0.4,
+        3.0
+    ])
+
+    growth_factor = quiz_results['growth'] * 0.15
+    Q = np.diag([growth_factor, growth_factor * 0.8, growth_factor * 0.6])
+    alpha = quiz_results['marketing'] * 2.5
+    principal = quiz_results['capital'
+
+    return {'p': p, 'c': c, 'Q': Q, 'alpha': alpha, 'principal': principal}
+
+
+
 #_________________KKT & KKT RESULT DISPLAYING_____________________
 
 #_________________DIAGNOSTICS & OPTIMISATION______________________
