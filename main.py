@@ -373,9 +373,9 @@ def diagnostics(allocation, params, p, c, Q):
     print(f"   Principal:  {principal:.9f}")
     print(f"   Gap (principal - total_cost): {gap:.6e}")
     if abs(gap) < 1e-6:
-        print("   Status: ✓ Tight constraint (good)")
+        print("   Status: Tight constraint (good)")
     else:
-        print("   Status: ⚠ Constraint not tight (possible slack)")
+        print("   Status: Constraint not tight (possible slack)")
 
     # Gradient / KKT quick check
     grad = p  # ∇_x of objective is p
@@ -384,9 +384,9 @@ def diagnostics(allocation, params, p, c, Q):
     print(f"   Gradient wrt x: {grad}")
     print(f"   Gradient norm: {grad_norm:.6f}")
     if grad_norm < 1e-3:
-        print("   Status: ✓ small gradient (interior optimal)")
+        print("   Status: small gradient (interior optimal)")
     else:
-        print("   Status: ⚠ larger gradient (likely active constraints)")
+        print("   Status: larger gradient (likely active constraints)")
 
     # Solver stats
     stats = allocation.get('solver_stats', None)
@@ -395,11 +395,11 @@ def diagnostics(allocation, params, p, c, Q):
         print("   No solver stats available in returned allocation.")
         return
 
-    # Print safe fields with getattr
+    
     print(f"   Solver Used: {getattr(stats, 'solver_name', 'UNKNOWN')}")
     print(f"   Solve Time: {getattr(stats, 'solve_time', 'N/A')}")
     print(f"   Status:     {getattr(stats, 'status', 'N/A')}")
-    # iterations may be named num_iters
+    
     if hasattr(stats, 'num_iters'):
         print(f"   Iterations: {stats.num_iters}")
     if hasattr(stats, 'primal_residual'):
