@@ -285,6 +285,66 @@ def plot_kkt_residuals(kkt_res):
     plt.show()
     print("\nKKT Residuals chart saved as 'kkt_residuals_check.png'")
 
+#-----------------OPTIMISATION MODEL-------------------
+def optimize_allocation(p, c, Q, alpha, principal):
+    """
+    Solve: maximize p^T*x + alpha*sqrt(m)
+    subject to: c^T*x + m + 0.5*x^T*Q*x <= principal
+                x >= 0, m >= 0
+    ECOS is forced.
+    """
+    x = cp.Variable(3)
+    m = cp.Variable(nonneg=True)
+
+    production_output = p @ x
+    marketing_uplift = alpha * cp.sqrt(m)
+    objective = cp.Maximize(production_output + marketing_uplift)
+
+    linear_cost = c @ x
+    quadratic_cost = 0.5 * cp.quad_form(x, Q)
+    total_cost = linear_cost + m + quadratic_cost
+
+    constraints = [total_cost <= principal, x >= 0, m >= 0]
+    problem = cp.Problem(objective, constraints)
+
+    try:
+        problem.solve(solver=cp.ECOS, verbose=False, feastol=1e-8, abstol=1e-8, reltol=1e-8, max_iters=500)
+    except cp.SolverError as e:
+        print("SolverError while calling ECOS:", e)
+        raise
+
+    stats = problem.solver_stats
+    
+    # Capture KKT results to return them 
+    kkt_results = {}
+    
+    if problem.status == cp.OPTIMAL or problem.status == cp.OPTIMAL_INACCURATE:
+        kkt_results = check_kkt_ecos(
+            x_val = x.value,
+            m_val = float(m.value),
+            p = p,
+            c = c,
+            Q = Q,
+            alpha = alpha,
+            principal = principal,
+            constraints = constraints
+        )
+        
+        return {
+            'status': 'optimal' if problem.status == cp.OPTIMAL else 'optimal_inaccurate',
+            'labour': float(x.value[0]),
+            'materials': float(x.value[1]),
+            'energy': float(x.value[2]),
+            'marketing': float(m.value) if m.value is not None else 0.0,
+            'total_output': float(problem.value),
+            'production_output': float(production_output.value),
+            'marketing_uplift': float(marketing_uplift.value),
+            'total_cost': float(total_cost.value),
+            'solver_stats': stats,
+            'kkt_diagnostics': kkt_results 
+        }
+    
+    return {'status': problem.status, 'solver_stats': stats}
 
 
 #_________________DIAGNOSTICS______________________
