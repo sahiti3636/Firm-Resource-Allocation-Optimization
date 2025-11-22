@@ -287,7 +287,64 @@ def plot_kkt_residuals(kkt_res):
 
 
 
-#_________________DIAGNOSTICS & OPTIMISATION______________________
+#_________________DIAGNOSTICS______________________
+def diagnostics(allocation, params, p, c, Q):
+    print("\n" + "=" * 50)
+    print("OPTIMIZATION DIAGNOSTICS & ACCURACY CHECK (ECOS)")
+    print("=" * 50)
+
+    if allocation['status'] not in ('optimal', 'optimal_inaccurate'):
+        print("Diagnostics unavailable: problem not optimal.")
+        return
+
+    total_cost = allocation['total_cost']
+    principal = params['principal']
+    gap = principal - total_cost
+
+    print(f"\nBUDGET CONSTRAINT CHECK:")
+    print(f"   Total Cost: {total_cost:.9f}")
+    print(f"   Principal:  {principal:.9f}")
+    print(f"   Gap (principal - total_cost): {gap:.6e}")
+    if abs(gap) < 1e-6:
+        print("   Status: ✓ Tight constraint (good)")
+    else:
+        print("   Status: ⚠ Constraint not tight (possible slack)")
+
+    # Gradient / KKT quick check
+    grad = p  # ∇_x of objective is p
+    grad_norm = np.linalg.norm(grad)
+    print("\nKKT / GRADIENT CHECK (informal):")
+    print(f"   Gradient wrt x: {grad}")
+    print(f"   Gradient norm: {grad_norm:.6f}")
+    if grad_norm < 1e-3:
+        print("   Status: ✓ small gradient (interior optimal)")
+    else:
+        print("   Status: ⚠ larger gradient (likely active constraints)")
+
+    # Solver stats
+    stats = allocation.get('solver_stats', None)
+    print("\nSOLVER STATISTICS (from problem.solver_stats):")
+    if stats is None:
+        print("   No solver stats available in returned allocation.")
+        return
+
+    # Print safe fields with getattr
+    print(f"   Solver Used: {getattr(stats, 'solver_name', 'UNKNOWN')}")
+    print(f"   Solve Time: {getattr(stats, 'solve_time', 'N/A')}")
+    print(f"   Status:     {getattr(stats, 'status', 'N/A')}")
+    # iterations may be named num_iters
+    if hasattr(stats, 'num_iters'):
+        print(f"   Iterations: {stats.num_iters}")
+    if hasattr(stats, 'primal_residual'):
+        print(f"   Primal Residual: {stats.primal_residual:.3e}")
+    if hasattr(stats, 'dual_residual'):
+        print(f"   Dual Residual: {stats.dual_residual:.3e}")
+    if hasattr(stats, 'gap'):
+        print(f"   Duality Gap: {stats.gap:.3e}")
+
+    print("\nFull solver_stats object (repr):")
+    print(repr(stats))
+    print("=" * 50)
 
 #__________________DISPLAYING RESULT______________________________
 
