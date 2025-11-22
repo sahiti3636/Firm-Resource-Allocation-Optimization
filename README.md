@@ -1,4 +1,4 @@
-# 🚀 Firm Resource Allocation Optimization (ECOS-Forced)
+# 🚀 Firm Resource Allocation Optimization
 
 ## 🌟 Project Overview
 
