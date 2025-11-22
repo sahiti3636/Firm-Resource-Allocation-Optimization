@@ -492,10 +492,10 @@ def main():
     else:
         print("\nUsing demo parameters...")
         params = {
-            'p': np.array([0.9, 0.75, 0.6]),
-            'c': np.array([4.0, 3.2, 3.0]),
+            'p': np.array([1.5, 1.45, 1.4]),
+            'c': np.array([3.5, 3.6, 3.0]),
             'Q': np.diag([0.3, 0.24, 0.18]),
-            'alpha': 5.0,
+            'alpha': 2.5,
             'principal': 100.0
         }
 
