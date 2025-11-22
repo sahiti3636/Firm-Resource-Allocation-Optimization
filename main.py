@@ -3,6 +3,13 @@ Firm Resource Allocation Optimization (ECOS-forced)
 Team: Cute Force
 Members: Potini Sahiti, Navya Sharma, D. Sreeteja
 """
+import cvxpy as cp
+import numpy as np
+import matplotlib.pyplot as plt
+import sys
+import pandas as pd
+import scipy
+
 #____________________ECOS CHECK___________________________________
 def ensure_ecos_available():
     installed = cp.installed_solvers()
@@ -97,7 +104,7 @@ def map_parameters(quiz_results):
     growth_factor = quiz_results['growth'] * 0.15
     Q = np.diag([growth_factor, growth_factor * 0.8, growth_factor * 0.6])
     alpha = quiz_results['marketing'] * 2.5
-    principal = quiz_results['capital'
+    principal = quiz_results['capital']
 
     return {'p': p, 'c': c, 'Q': Q, 'alpha': alpha, 'principal': principal}
 
