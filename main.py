@@ -291,4 +291,48 @@ def plot_kkt_residuals(kkt_res):
 
 #__________________DISPLAYING RESULT______________________________
 
+def display_results(allocation, params):
+    if allocation['status'] != 'optimal' and allocation['status'] != 'optimal_inaccurate':
+        print(f"Optimization failed: {allocation['status']}")
+        return
+
+    print("\n" + "=" * 50)
+    print("OPTIMAL RESOURCE ALLOCATION")
+    print("=" * 50)
+
+    print(f"\nBUDGET BREAKDOWN:")
+    print(f"   Labour:     ${allocation['labour']:.2f}k")
+    print(f"   Materials:  ${allocation['materials']:.2f}k")
+    print(f"   Energy:     ${allocation['energy']:.2f}k")
+    print(f"   Marketing:  ${allocation['marketing']:.2f}k")
+    print(f"   TOTAL COST: ${allocation['total_cost']:.6f}k / ${params['principal']:.2f}k")
+
+    print(f"\nOUTPUT METRICS:")
+    print(f"   Production Output:  {allocation['production_output']:.6f}")
+    print(f"   Marketing Uplift:   {allocation['marketing_uplift']:.6f}")
+    print(f"   TOTAL OUTPUT:       {allocation['total_output']:.6f}")
+
+    # Visualization (same as before)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    labels = ['Labour', 'Materials', 'Energy', 'Marketing']
+    sizes = [allocation['labour'], allocation['materials'],
+             allocation['energy'], allocation['marketing']]
+    colors = ['#ff9999', '#66b3ff', '#99ff99', '#ffcc99']
+
+    ax1.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+    ax1.set_title('Budget Allocation')
+
+    ax2.bar(labels, sizes, edgecolor='black')
+    ax2.set_ylabel('Allocation ($k)')
+    ax2.set_title('Resource Distribution')
+    ax2.axhline(y=params['principal'] / 4, color='r', linestyle='--',
+                label='Equal Split', alpha=0.5)
+    ax2.legend()
+
+    plt.tight_layout()
+    plt.savefig('allocation_results_ecos.png', dpi=150)
+    plt.show()
+    print("\nChart saved as 'allocation_results_ecos.png'")
+
+
 #_____________________MAIN FUNCTION_______________________________
