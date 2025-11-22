@@ -453,3 +453,84 @@ def display_results(allocation, params):
 
 
 #_____________________MAIN FUNCTION_______________________________
+def main():
+    ensure_ecos_available()
+
+    print("\n" + "=" * 50)
+    print("FIRM RESOURCE ALLOCATION OPTIMIZER (ECOS FORCED)")
+    print("Team Cute Force")
+    print("=" * 50 + "\n")
+
+    mode = input("Use (1) Interactive Quiz or (2) Demo Values? [1/2]: ").strip()
+
+    if mode == '1':
+        quiz_results = firm_quiz()
+        params = map_parameters(quiz_results)
+    else:
+        print("\nUsing demo parameters...")
+        params = {
+            'p': np.array([0.9, 0.75, 0.6]),
+            'c': np.array([4.0, 3.2, 3.0]),
+            'Q': np.diag([0.3, 0.24, 0.18]),
+            'alpha': 5.0,
+            'principal': 100.0
+        }
+
+    print("\nMAPPED PARAMETERS:")
+    print(f"   Productivity (p):  {params['p']}")
+    print(f"   Costs (c):         {params['c']}")
+    print(f"   Marketing (α):     {params['alpha']:.2f}")
+    print(f"   Capital:           ${params['principal']:.2f}k")
+
+    print("\nRunning optimization (ECOS forced)...")
+    allocation = optimize_allocation(
+        params['p'], params['c'], params['Q'],
+        params['alpha'], params['principal']
+    )
+
+    # 1. Display Standard Results (Pie Chart / Bar Graph)
+    # NOTE: You must close the window that pops up for the code to continue!
+    display_results(allocation, params)
+    
+    # 2. Display KKT Residuals Plot (The new request)
+    if 'kkt_diagnostics' in allocation:
+        print("\nGeneratng KKT Residuals Plot...")
+        plot_kkt_residuals(allocation['kkt_diagnostics'])
+    
+    # 3. Text Diagnostics
+    diagnostics(allocation, params, params['p'], params['c'], params['Q'])
+
+    # 4. Sensitivity Analysis
+    print("\n" + "=" * 50)
+    print("SENSITIVITY ANALYSIS")
+    print("=" * 50)
+
+    capitals = [50, 75, 100, 125, 150]
+    outputs = []
+    for cap in capitals:
+        # This runs silently now without popping up graphs
+        res = optimize_allocation(params['p'], params['c'], params['Q'], params['alpha'], cap)
+        if res.get('status') in ('optimal', 'optimal_inaccurate'):
+            outputs.append(res['total_output'])
+            print(f"   Capital: ${cap}k  ->  Output: {res['total_output']:.6f}")
+        else:
+            outputs.append(np.nan)
+            print(f"   Capital: ${cap}k  ->  status: {res.get('status')}")
+
+    # Sensitivity Plot
+    xs = [c for c, val in zip(capitals, outputs) if not np.isnan(val)]
+    ys = [val for val in outputs if not np.isnan(val)]
+    if xs:
+        plt.figure(figsize=(8, 5))
+        plt.plot(xs, ys, marker='o', linewidth=2, markersize=8)
+        plt.fill_between(xs, ys, alpha=0.3)
+        plt.xlabel('Capital ($k)')
+        plt.ylabel('Total Output')
+        plt.title('Output vs. Capital Investment (ECOS)')
+        plt.grid(True, alpha=0.3)
+        plt.savefig('sensitivity_analysis_ecos.png', dpi=150)
+        plt.show()
+        print("\nChart saved as 'sensitivity_analysis_ecos.png'")
+
+if __name__ == "__main__":
+    main()
