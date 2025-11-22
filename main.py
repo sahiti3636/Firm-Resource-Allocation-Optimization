@@ -515,7 +515,6 @@ def main():
     capitals = [50, 75, 100, 125, 150]
     outputs = []
     for cap in capitals:
-        # This runs silently now without popping up graphs
         res = optimize_allocation(params['p'], params['c'], params['Q'], params['alpha'], cap)
         if res.get('status') in ('optimal', 'optimal_inaccurate'):
             outputs.append(res['total_output'])
