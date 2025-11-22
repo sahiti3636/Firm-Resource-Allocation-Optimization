@@ -22,7 +22,6 @@ def firm_quiz():
     print("=" * 50)
     print("FIRM RESOURCE ALLOCATION QUIZ")
     print("=" * 50 + "\n")
-    # (same questions as before)
     print("1. What is your firm's stage?")
     print("   a) Early-stage startup\n   b) Growth phase\n   c) Mature/established")
     stage = input("Answer (a/b/c): ").strip().lower()
@@ -73,6 +72,15 @@ def firm_quiz():
     }
 
 def map_parameters(quiz_results):
+    """
+    Map qualitative quiz answers into quantitative model parameters 
+    using hardcoded scaling coefficients. 
+    - p: productivity levels based on efficiency score
+    - c: input costs adjusted using labour/materials scores
+    - Q: quadratic cost curvature scaled by growth score
+    - alpha: marketing effectiveness from marketing score
+    - principal: budget directly from quiz input
+    """
     base_productivity = quiz_results['efficiency'] * 0.4
     p = np.array([
         base_productivity + 0.3,
