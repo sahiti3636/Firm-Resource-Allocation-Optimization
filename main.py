@@ -127,17 +127,18 @@ def check_kkt_ecos(x_val, m_val, p, c, Q, alpha, principal, constraints, rel_tol
 
     # Extract constraints safely
     try:
-        budget_constraint = constraints[0]
-        x_nonneg_constraint = constraints[1]
+        budget_constraint = constraints[0] #budget constraint 
+        x_nonneg_constraint = constraints[1] # x>=0
     except Exception as e:
         print("ERROR: constraints not in expected format:", e)
         return {"error": "bad_constraints"}
 
+    #getting the coefficients form dual values saved by the solver
     lam_raw = getattr(budget_constraint, "dual_value", None)
     mu_raw  = getattr(x_nonneg_constraint, "dual_value", None)
 
     lam = np.nan if lam_raw is None else float(np.asarray(lam_raw).ravel()[0])
-    if mu_raw is None:
+    if mu_raw is None: # converting them to a scalar no
         mu = np.full_like(x_val, np.nan, dtype=float)
     else:
         mu = np.asarray(mu_raw, dtype=float).ravel()
@@ -155,7 +156,7 @@ def check_kkt_ecos(x_val, m_val, p, c, Q, alpha, principal, constraints, rel_tol
     grad_g_x = c + Q @ x_val
     grad_g_m = 1.0
 
-    # scales for tolerances
+    # scales for tolerances so we arent lookign for 0 specifically...
     scale_budget = max(1.0, abs(principal), abs(total_cost_val))
     scale_mu = max(1.0, np.linalg.norm(mu, ord=np.inf))
     scale_grad = max(1.0, np.linalg.norm(grad_x, ord=np.inf), np.linalg.norm(p, ord=np.inf))
