@@ -7,9 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/14-XftSaaqHUhU9N6xERlr6Umlr9hWCIT
 """
 
-# ============================================================
-# STEP 0 — SETUP (Google Colab Friendly)
-# ============================================================
 !pip install ecos scs
 import numpy as np
 import pandas as pd
@@ -17,9 +14,7 @@ from IPython.display import display
 import ipywidgets as widgets
 
 
-# ============================================================
-# STEP 1 — USER INPUT (QUIZ) THROUGH SLIDERS
-# ============================================================
+# STEP 1 — USER INPUT (QUIZ) 
 
 print("Please answer the following questions (0 = low, 1 = high):")
 
@@ -39,15 +34,12 @@ quiz_widgets = widgets.VBox([
 display(quiz_widgets)
 
 
-# Button to trigger mapping
 run_mapping = widgets.Button(description="Generate Parameters")
 output_box = widgets.Output()
 display(run_mapping, output_box)
 
 
-# ============================================================
-# STEP 2 — DETERMINISTIC MAPPING RULES
-# ============================================================
+#mapping
 
 def map_quiz_to_parameters(quiz):
     """Convert quiz answers → model parameters (deterministic)."""
@@ -87,9 +79,6 @@ def map_quiz_to_parameters(quiz):
     }
 
 
-# ============================================================
-# STEP 3 — EXECUTE MAPPING WHEN BUTTON CLICKED
-# ============================================================
 
 def on_button_click(b):
     quiz = {
@@ -120,12 +109,7 @@ def on_button_click(b):
 
 run_mapping.on_click(on_button_click)
 
-
-###################################################################################################################################################
-
-# ============================================================
-# SAFE OPTIMIZATION MODEL — FIXED, SCALED, STABLE VERSION
-# ============================================================
+#opt model
 
 !pip install -q cvxpy scs
 
@@ -147,9 +131,7 @@ def pick_solver():
 SOLVER = pick_solver()
 print("Using solver:", SOLVER)
 
-# ============================================================
-# PARAMETER MAPPING (IMPROVED)
-# ============================================================
+
 
 def map_quiz_to_parameters_safe(quiz):
 
@@ -180,7 +162,7 @@ def map_quiz_to_parameters_safe(quiz):
 
     marketing_cap = 0.4
 
-    # Much safer production target
+    
     y_min = 0.05 * principal
 
     return {
@@ -194,9 +176,8 @@ def map_quiz_to_parameters_safe(quiz):
         "y_min": y_min
     }
 
-# ============================================================
+
 # SOLVER (IMPROVED)
-# ============================================================
 
 def solve_single_scenario_safe(params):
 
@@ -210,7 +191,7 @@ def solve_single_scenario_safe(params):
 
     Qs = 0.5*(Q+Q.T)
 
-    xmax = np.array([500, 500, 500])   # <-- NEW: Upper bounds
+    xmax = np.array([500, 500, 500]) 
 
     cons = [
         c @ x + m + 0.5*cp.quad_form(x, Qs) + 0.5*q_m*cp.square(m) <= principal,
@@ -257,9 +238,7 @@ def solve_single_scenario_safe(params):
         "marketing_cap": marketing_cap
     }
 
-# ============================================================
-# USE SLIDERS IF AVAILABLE
-# ============================================================
+
 
 try:
     _ = stage.value
@@ -297,9 +276,8 @@ print("\n===== RESULT =====")
 for k,v in res.items():
     print(k,":",v)
 
-# ============================================================
-# SAFE OPTIMIZATION MODEL — FULL WORKING VERSION
-# ============================================================
+
+# SAFE OPTIMIZATION MODEL
 
 !pip install -q cvxpy
 !pip install ecos scs
@@ -309,9 +287,7 @@ import cvxpy as cp
 import ipywidgets as widgets
 from IPython.display import display
 
-# ============================================================
-# 1. Solver selection helper
-# ============================================================
+
 PREFERRED_SOLVERS = ["SCS","OSQP" ] #"ECOS",
 
 def pick_solver():
@@ -324,50 +300,34 @@ SOLVER = pick_solver()
 print("Using solver:", SOLVER)
 
 
-# ============================================================
-# 2. SAFE PARAMETER MAPPING FUNCTION
-# ============================================================
 def map_quiz_to_parameters_safe(quiz):
     """
     Maps quiz inputs → optimization parameters.
     Includes anti-bias rules and safe curvature choices.
     """
-    # ----------------------------
-    # Productivity vector
-    # ----------------------------
+
     p = np.array([
         2.0 + 0.8 * quiz["ops_eff"],
         1.5 + 0.5 * quiz["mat_rel"],
         0.8 + 0.2 * (1 - quiz["energy_pressure"])
     ], dtype=float)
 
-    # ----------------------------
-    # Linear input costs
-    # ----------------------------
+
     labour_cost = 20.0 * (1 + 0.4 * (1 - quiz["lab_avail"]))
     material_cost = 10.0 * (1 + 0.3 * (1 - quiz["mat_rel"]))
     energy_cost = 5.0 * (1 + 0.5 * quiz["energy_pressure"])
 
     c = np.array([labour_cost, material_cost, energy_cost], dtype=float)
 
-    # ----------------------------
-    # Quadratic costs for labour/material/energy
-    # (diagonal PSD matrix)
-    # ----------------------------
     Q = np.diag([
         0.02 * (1 + 0.6 * (1 - quiz["lab_avail"])),
         0.01 * (1 + 0.5 * (1 - quiz["mat_rel"])),
         0.005 * (1 + 0.8 * quiz["energy_pressure"])
     ]).astype(float)
 
-    # ----------------------------
-    # Principal (budget)
-    # ----------------------------
+   
     principal = 5000.0 + 4000.0 * quiz["growth"] + 3000.0 * quiz["fundraising"]
 
-    # ----------------------------
-    # Marketing effectiveness (reduced from previous version)
-    # ----------------------------
     alpha = 10.0 + 15.0 * quiz["marketing_focus"]
 
     # Quadratic marketing cost
@@ -377,13 +337,11 @@ def map_quiz_to_parameters_safe(quiz):
     marketing_cap = 0.30 + 0.20 * (1 - quiz["stage"])
     marketing_cap = min(0.6, max(0.1, marketing_cap))
 
-    # ----------------------------
-    # Minimum production requirement
-    # ----------------------------
+   
     base_target = 50.0
     y_min = base_target * (0.5 + 1.5 * quiz["stage"]) * (1.0 + 1.5 * quiz["growth"])
 
-    # Safe clamp (never require impossible production)
+    
     rough_upper = p @ (principal / np.maximum(c, 1e-6))
     y_min = min(y_min, 0.9 * rough_upper)
 
@@ -399,9 +357,6 @@ def map_quiz_to_parameters_safe(quiz):
     }
 
 
-# ============================================================
-# 3. SAFE OPTIMIZATION SOLVER
-# ============================================================
 def solve_single_scenario_safe(params, solver=SOLVER, verbose=False):
 
     p = params["productivity"]
@@ -441,7 +396,7 @@ def solve_single_scenario_safe(params, solver=SOLVER, verbose=False):
     if prob.status not in ["optimal", "optimal_inaccurate"]:
         return {"status": prob.status}
 
-    # Extract solution safely
+
     x_opt = np.array(x.value).flatten()
     m_opt = float(m.value)
     obj_val = float(prob.value)
@@ -476,10 +431,6 @@ def solve_single_scenario_safe(params, solver=SOLVER, verbose=False):
         "marketing_cap": marketing_cap
     }
 
-
-# ============================================================
-# 4. USE EXISTING SLIDERS (OR FALLBACK VALUES)
-# ============================================================
 try:
     _ = stage.value
     print("Using existing widgets.")
