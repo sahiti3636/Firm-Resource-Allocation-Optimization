@@ -1,6 +1,6 @@
-# 🚀 Firm Resource Allocation Optimization
+#  Firm Resource Allocation Optimization
 
-## 🌟 Project Overview
+##  Project Overview
 
 This project provides a **Convex Optimization–based decision system** that helps firms distribute their capital across four key channels efficiently:
 
@@ -13,7 +13,7 @@ The optimization is solved using **Second-Order Cone Programming (SOCP)** with t
 
 ---
 
-## 👥 Team Cute Force
+##  Team Cute Force
 
 | Member            | ID        |
 |-------------------|-----------|
@@ -23,26 +23,26 @@ The optimization is solved using **Second-Order Cone Programming (SOCP)** with t
 
 ---
 
-## 🔧 Features
+##  Features
 
-### ✔️ Interactive Firm Quiz
+###  Interactive Firm Quiz
 Converts 8 qualitative business responses into quantitative optimization parameters (productivity, costs, curvature).
 
-### ✔️ ECOS-Forced Optimization
+###  ECOS-Forced Optimization
 Solver explicitly fixed to **ECOS** for stable SOCP execution.
 
-### ✔️ Automatic KKT Condition Validation
+###  Automatic KKT Condition Validation
 Checks:
 - Stationarity  
 - Complementary slackness  
 - Primal & dual feasibility
 
-### ✔️ Sensitivity Analysis
+###  Sensitivity Analysis
 Analyzes how the firm's total output responds to different budget levels.
 
 ---
 
-## 📦 Installation
+##  Installation
 
 ### 1. Clone the repository
 ```bash
@@ -57,7 +57,7 @@ pip install -r requirements.txt
 
 ---
 
-## ▶️ Running the Project
+##  Running the Project
 
 ```bash
 python main.py
@@ -69,7 +69,7 @@ Choose one of:
 
 ---
 
-## 📊 Visualization Flow
+##  Visualization Flow
 
 The optimization produces **three sequential plots**.  
 Close each to proceed to the next.
@@ -80,7 +80,7 @@ Close each to proceed to the next.
 
 ---
 
-## 🗂️ Generated Output Files
+##  Generated Output Files
 
 | File                           | Description                                |
 |--------------------------------|--------------------------------------------|
@@ -90,7 +90,7 @@ Close each to proceed to the next.
 
 ---
 
-## 📚 Tech Stack
+##  Tech Stack
 
 - Python 3.x  
 - `cvxpy`  
